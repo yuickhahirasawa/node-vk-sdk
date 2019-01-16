@@ -4,7 +4,7 @@ import VKApiError from "./VKApiError";
 import * as Responses from './Responses'
 import * as MethodsProps from './MethodsProps'
 
-const req = require('tiny_request')
+const req = require('tiny_request');
 
 const REQUESTS_PER_SECOND = 3
 const TIMEOUT = 5000 // 5 seconds
@@ -59,7 +59,7 @@ export class VKApi {
             let reqFunc = () => {
                 req.post({
                     url: API_BASE_URL + method,
-                    query: params,
+                    form: params,
                     json: true,
                     timeout: this._timeout
                 }, (body, response, err) => {
