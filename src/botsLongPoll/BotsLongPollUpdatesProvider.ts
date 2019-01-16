@@ -49,6 +49,8 @@ export class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
                     break;
                 }
 
+                this.ts = body.ts;
+
                 if (this.updatesCallback)
                     this.updatesCallback(body.updates)
 

@@ -48,6 +48,7 @@ class BotsLongPollUpdatesProvider {
                     if (body.failed) {
                         break;
                     }
+                    this.ts = body.ts;
                     if (this.updatesCallback)
                         this.updatesCallback(body.updates);
                 }
