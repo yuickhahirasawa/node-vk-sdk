@@ -40,7 +40,7 @@ class VKApi {
                 let reqFunc = () => {
                     req.post({
                         url: API_BASE_URL + method,
-                        query: params,
+                        form: params,
                         json: true,
                         timeout: this._timeout
                     }, (body, response, err) => {
