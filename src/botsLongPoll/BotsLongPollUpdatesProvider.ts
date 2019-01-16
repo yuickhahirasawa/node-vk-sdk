@@ -38,6 +38,8 @@ export class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
                 json: true
             },
             (body, response, err) => {
+                console.log('long body', body);
+                console.log('long resp', JSON.stringify(response));
                 if (!err && response.statusCode == 200) {
                     this.ts = body.ts
 
