@@ -1,12 +1,13 @@
 import {BaseUpdateProvider} from "./BaseUpdateProvider";
 import {VKApi} from "../VKApi";
+import {get} from "request-promise";
 const req = require('tiny_request')
 
 export class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
-    private server: string
-    private key: string
-    private ts: number
-    private updatesCallback: (update: any) => void
+    private server: string;
+    private key: string;
+    private ts: number;
+    private updatesCallback: (update: any) => void;
 
     constructor(
         private api: VKApi,
@@ -20,39 +21,41 @@ export class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
     }
 
     private async init() {
-        let longPollServer = await this.api.groupsGetLongPollServer({
-            group_id: this.groupId
-        })
-
-        this.server = longPollServer.server
-        this.key = longPollServer.key
-        this.ts = longPollServer.ts
-
-        this.poll()
+        while (true) {
+            await this.getServerData();
+            await this.poll();
+        }
     }
 
-    private poll() {
-        req.get(
-            {
-                url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`
-            },
-            (body, response, err) => {
-                console.log('long body', body);
-                console.log('long resp', response);
-                console.log('long err', err);
-                body = JSON.parse(body);
-                if (!err && response.statusCode == 200) {
-                    this.ts = body.ts
+    private async getServerData() {
+        let longPollServer = await this.api.groupsGetLongPollServer({
+            group_id: this.groupId
+        });
 
-                    if (this.updatesCallback)
-                        this.updatesCallback(body.updates)
+        this.server = longPollServer.server;
+        this.key = longPollServer.key;
+        this.ts = longPollServer.ts;
+    }
 
-                    this.poll()
-                    return
+    private async poll() {
+        while (true) {
+            try {
+                const body = await get({
+                    url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`,
+                    json: true
+                });
+
+                if (body.failed) {
+                    break;
                 }
 
-                this.poll()
+                if (this.updatesCallback)
+                    this.updatesCallback(body.updates)
+
+            } catch (e) {
+                console.log(e);
+                break;
             }
-        )
+        }
     }
 }

@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const request_promise_1 = require("request-promise");
 const req = require('tiny_request');
 class BotsLongPollUpdatesProvider {
     constructor(api, groupId) {
@@ -20,31 +21,41 @@ class BotsLongPollUpdatesProvider {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
+            while (true) {
+                yield this.getServerData();
+                yield this.poll();
+            }
+        });
+    }
+    getServerData() {
+        return __awaiter(this, void 0, void 0, function* () {
             let longPollServer = yield this.api.groupsGetLongPollServer({
                 group_id: this.groupId
             });
             this.server = longPollServer.server;
             this.key = longPollServer.key;
             this.ts = longPollServer.ts;
-            this.poll();
         });
     }
     poll() {
-        req.get({
-            url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`
-        }, (body, response, err) => {
-            console.log('long body', body);
-            console.log('long resp', response);
-            console.log('long err', err);
-            body = JSON.parse(body);
-            if (!err && response.statusCode == 200) {
-                this.ts = body.ts;
-                if (this.updatesCallback)
-                    this.updatesCallback(body.updates);
-                this.poll();
-                return;
+        return __awaiter(this, void 0, void 0, function* () {
+            while (true) {
+                try {
+                    const body = yield request_promise_1.get({
+                        url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`,
+                        json: true
+                    });
+                    if (body.failed) {
+                        break;
+                    }
+                    if (this.updatesCallback)
+                        this.updatesCallback(body.updates);
+                }
+                catch (e) {
+                    console.log(e);
+                    break;
+                }
             }
-            this.poll();
         });
     }
 }

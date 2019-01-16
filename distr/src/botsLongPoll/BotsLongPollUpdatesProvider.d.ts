@@ -10,5 +10,6 @@ export declare class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
     constructor(api: VKApi, groupId: number);
     getUpdates(callback: (update: any) => void): void;
     private init;
+    private getServerData;
     private poll;
 }
