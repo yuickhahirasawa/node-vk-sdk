@@ -34,13 +34,13 @@ export class BotsLongPollUpdatesProvider implements BaseUpdateProvider {
     private poll() {
         req.get(
             {
-                url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`,
-                json: true
+                url: `${this.server}?act=a_check&key=${this.key}&ts=${this.ts}&wait=25`
             },
             (body, response, err) => {
                 console.log('long body', body);
                 console.log('long resp', JSON.stringify(response));
                 console.log('long err', JSON.stringify(err));
+                body = JSON.parse(body);
                 if (!err && response.statusCode == 200) {
                     this.ts = body.ts
 
